@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Rain</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+            font-family: monospace;
+        }
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        .search-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            width: 80%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .search-bar {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #0f0;
+            border-radius: 25px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #0f0;
+            font-size: 18px;
+            outline: none;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        .search-bar::placeholder {
+            color: rgba(0, 255, 0, 0.5);
+        }
+        .search-bar:focus {
+            background: rgba(0, 0, 0, 0.9);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix"></canvas>
+    <div class="search-container">
+        <input type="text" class="search-bar" placeholder="Enter URL..." />
+        <input type="text" class="search-bar" placeholder="Enter prompt..." />
+    </div>
+    <script>
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const charSize = 20;
+        const columns = Math.floor(canvas.width / charSize);
+        
+        // Initialize drops with random starting positions
+        const drops = Array(columns).fill().map(() => Math.floor(Math.random() * canvas.height / charSize));
+        const columnBinary = Array(columns).fill().map(() => Math.random() < 0.5 ? '0' : '1');
+        
+        // Function to randomly change binary value
+        function getRandomBinary() {
+            return Math.random() < 0.5 ? '0' : '1';
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#0F0';
+            ctx.font = '20px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                // Randomly update the binary value with a slight chance
+                if (Math.random() < 0.5) {
+                    columnBinary[i] = getRandomBinary();
+                }
+
+                const x = i * charSize;
+                const y = drops[i] * charSize;
+
+                ctx.fillStyle = '#0F0';
+                ctx.fillText(columnBinary[i], x, y);
+
+                if (y > canvas.height) {
+                    // Reset the drop to the top after reaching the bottom
+                    drops[i] = 0;
+                }
+
+                drops[i]++;
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const newColumns = Math.floor(canvas.width / charSize);
+            drops.length = newColumns;
+            columnBinary.length = newColumns;
+
+            // Reinitialize the drops with random starting positions
+            for (let i = 0; i < newColumns; i++) {
+                drops[i] = Math.floor(Math.random() * canvas.height / charSize);
+                columnBinary[i] = Math.random() < 0.5 ? '0' : '1';
+            }
+        });
+
+        setInterval(draw, 60); // Reduced interval time to make the animation slightly faster
+    </script>
+</body>
+</html>
